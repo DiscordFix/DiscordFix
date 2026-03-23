@@ -5,112 +5,150 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DiscordFix</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link rel="icon" href="icon.png" type="image/x-icon">
     
     <style>
         :root {
-            --bg: #f8f9fb;
-            --accent: #5865F2;
-            --danger: #ff4757;
-            --warning: #ffa502;
-            --glass: rgba(255, 255, 255, 0.7);
-            --border: rgba(0, 0, 0, 0.05);
-            --shadow: 0 20px 40px rgba(0,0,0,0.05);
+            --bg: #f0f4f8;
+            --accent: #0054ad;
+            --accent-light: #0026ff;
+            --surface: rgba(255, 255, 255, 0.6);
+            --text-dark: #1d1d1f;
+            --text-muted: #4d4d4d;
+            --glass-border: rgba(255, 255, 255, 0.4);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: none !important; }
+        
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            color: #1a1a1a;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
             overflow-x: hidden;
-            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
         }
 
         #canvas-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; pointer-events: none; opacity: 0.6;
+            z-index: -1; opacity: 0.9;
         }
 
         #cursor {
             width: 8px; height: 8px; background: var(--accent); position: fixed;
             border-radius: 50%; z-index: 10001; pointer-events: none;
+            box-shadow: 0 0 15px var(--accent);
         }
         #cursor-outline {
-            width: 40px; height: 40px; border: 2px solid var(--accent);
+            width: 45px; height: 45px; border: 1.5px solid var(--accent);
             position: fixed; border-radius: 50%; z-index: 10000; pointer-events: none;
-            transition: transform 0.15s ease-out;
+            transition: transform 0.2s cubic-bezier(0.2, 1, 0.3, 1);
         }
 
         nav {
             display: flex; justify-content: space-between; align-items: center;
             padding: 20px 8%; position: fixed; width: 100%; top: 0;
-            background: var(--glass); backdrop-filter: blur(20px); z-index: 1000;
-            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(25px);
+            z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.3);
         }
-        .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -1px; color: var(--accent); }
+
+        .logo { 
+            font-weight: 800; font-size: 1.4rem; display: flex; align-items: center; gap: 12px;
+            letter-spacing: -1px; color: var(--text-dark);
+        }
+        .logo i { 
+            background: linear-gradient(135deg, var(--accent), var(--accent-light)); 
+            color: white; padding: 10px; border-radius: 12px; font-size: 0.9rem;
+            box-shadow: 0 8px 15px var(--accent-glow);
+        }
 
         header {
-            height: 90vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center; padding: 0 20px;
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+            padding: 0 20px;
         }
 
-        .badge {
-            background: white; padding: 8px 20px; border-radius: 100px;
-            box-shadow: var(--shadow); font-size: 0.8rem; font-weight: 600;
-            margin-bottom: 30px; border: 1px solid var(--border);
+        h1 { 
+            font-size: clamp(3.5rem, 10vw, 7rem); font-weight: 800; letter-spacing: -5px; 
+            line-height: 0.85; margin-bottom: 25px; color: var(--text-dark);
+        }
+        h1 span { 
+            background: linear-gradient(to bottom, var(--accent), var(--accent-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        h1 { font-size: clamp(2.5rem, 8vw, 6rem); font-weight: 800; letter-spacing: -4px; line-height: 1; margin-bottom: 25px; }
-        h1 span { color: var(--accent); }
-
-        .btn-main {
-            background: var(--accent); color: white; padding: 22px 50px;
-            border-radius: 20px; text-decoration: none; font-weight: 700;
-            font-size: 1.1rem; border: none; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 20px 40px rgba(88, 101, 242, 0.3);
+        .subtitle { 
+            max-width: 650px; font-size: 1.3rem; color: var(--text-muted); 
+            margin-bottom: 45px; font-weight: 400; line-height: 1.5;
         }
-        .btn-main:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 30px 60px rgba(88, 101, 242, 0.4); }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
-        
+        .btn-download {
+            background: var(--text-dark); color: white; padding: 22px 50px;
+            border-radius: 100px; font-weight: 700; font-size: 1.1rem;
+            border: none; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+            text-decoration: none; display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .btn-download:hover { 
+            transform: translateY(-5px); 
+            background: var(--accent);
+            box-shadow: 0 25px 50px var(--accent-glow);
+        }
+
+        .container { 
+            max-width: 1200px; margin: 0 auto; padding: 100px 20px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;
+        }
+
         .card {
-            background: white; border-radius: 30px; padding: 40px;
-            margin-bottom: 30px; border: 1px solid var(--border);
-            box-shadow: var(--shadow);
+            background: var(--surface); border: 1px solid var(--glass-border);
+            padding: 50px 40px; border-radius: 40px; backdrop-filter: blur(20px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.03); 
+            position: relative; overflow: hidden; height: 350px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1);
         }
 
-        .alert-box { border-left: 6px solid var(--accent); }
-        .alert-danger { border-left-color: var(--danger); }
-        .alert-warning { border-left-color: var(--warning); }
+        .card-main {
+            transition: all 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+            display: flex; flex-direction: column; align-items: center;
+        }
 
-        h2 { font-size: 2rem; margin-bottom: 20px; letter-spacing: -1px; }
-        h3 { font-size: 1.2rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .card i { font-size: 2.5rem; color: var(--accent); margin-bottom: 20px; }
+        .card h3 { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+        .card p.preview-text { color: var(--text-muted); font-size: 1rem; }
 
-        .f-code { font-family: 'Fira Code', monospace; background: #f0f0f5; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
-
-        ul { list-style: none; }
-        li { margin-bottom: 15px; padding-left: 30px; position: relative; }
-        li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+        .card-info {
+            position: absolute; width: 80%; opacity: 0; transform: scale(0.9) translateY(20px);
+            transition: all 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+            color: var(--text-dark); line-height: 1.6; font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .card:hover { 
+            transform: translateY(-15px); background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 30px 60px rgba(0,122,255,0.1);
+        }
+        .card:hover .card-main { opacity: 0; transform: translateY(-30px); }
+        .card:hover .card-info { opacity: 1; transform: scale(1) translateY(0); }
 
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.98); z-index: 2000; display: none;
-            justify-content: center; align-items: center;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(40px);
+            z-index: 2000; display: none; justify-content: center; align-items: center;
         }
         .term {
-            width: 100%; max-width: 500px; background: #1a1a1a; color: #00ff88;
-            padding: 30px; border-radius: 20px; font-family: 'Fira Code', monospace; font-size: 0.9rem;
+            width: 90%; max-width: 500px; background: #000; color: #fff;
+            padding: 40px; border-radius: 35px; font-family: 'Fira Code', monospace;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.2); font-size: 0.9rem;
         }
+        .term-line { margin-bottom: 10px; border-left: 2px solid var(--accent); padding-left: 15px; }
 
-        footer { padding: 80px 0; text-align: center; color: #aaa; font-size: 0.9rem; }
+        footer { text-align: center; padding: 80px 20px; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; }
 
         @media (max-width: 768px) {
-            h1 { font-size: 3.5rem; }
-            .card { padding: 25px; }
+            h1 { font-size: 3.8rem; }
+            .container { grid-template-columns: 1fr; }
+            .card { height: 300px; }
         }
     </style>
 </head>
@@ -122,109 +160,112 @@
 
 <nav>
     <div class="logo"><i class="fab fa-discord"></i> DiscordFix</div>
-    <div style="font-size: 0.8rem; font-weight: 600; opacity: 0.5;">GITHUB OFFICIAL BUILD</div>
+    <div style="font-size: 0.75rem; font-weight: 800; color: var(--accent); letter-spacing: 1px;">RELEASE 23.03.26</div>
 </nav>
 
 <header>
-    <div class="badge" data-aos="fade-down">RELEASE v3.0 // 2026</div>
-    <h1 data-aos="fade-up">Discord. <span>Оживает</span> здесь.</h1>
-    <p style="max-width: 600px; margin-bottom: 40px; color: #666; font-size: 1.1rem;" data-aos="fade-up" data-aos-delay="100">
-        Ультимативный способ обхода блокировок и исправления RTC. Забудьте о бесконечной загрузке и лагах в голосовых каналах.
-    </p>
-    <button class="btn-main" onclick="startDownload()">
-        <i class="fas fa-cloud-download-alt"></i> Скачать сборку
-    </button>
+    <h1>Fix <span>Discord.</span></h1>
+    <p class="subtitle">Ультимативный способ обхода блокировок и исправления RTC. Забудьте о бесконечной загрузке и лагах в голосовых каналах.</p>
+    <a href="javascript:void(0)" class="btn-download" onclick="startDownload()">
+        <i class="fas fa-cloud-arrow-down"></i> Скачать
+    </a>
 </header>
 
 <div class="container">
-    <div class="card alert-danger" data-aos="fade-up">
-        <h3><i class="fas fa-user-shield"></i> ФЕЙКИ</h3>
-        <p>Я не веду никакие другие страницы, группы в Telegram или каналы на YouTube. Если вы нашли этот софт где-то, кроме официального SiteFix — это <b>ФЕЙК</b>.</p>
-    </div>
-
-    <div class="card alert-warning" data-aos="fade-up">
-        <h3><i class="fas fa-biohazard"></i> АНТИВИРУСЫ</h3>
-        <p>Драйвер <span class="f-code">WinDivert</span> — это инструмент для перехвата трафика. Некоторые антивирусы по ошибке считают его вирусом (Not-a-virus:RiskTool). Добавьте папку в исключения или отключите детект PUA в настройках вашего защитника.</p>
-    </div>
-
-    <div class="card" data-aos="fade-up">
-        <h2>⚙️ Использование</h2>
-        <ul>
-            <li><b>Скачайте архив:</b> Пкм по архиву -> Разархивировать -> Запустить.</li>
-            <li><b>Путь установки:</b> Распакуйте в папку без кириллицы (например, C:\Zapret).</li>
-            <li><b>Запуск:</b> Используйте <span class="f-code">DiscordFix.exe</span></li>
-        </ul>
-    </div>
-
-    <div class="card" data-aos="fade-up">
-        <h2>ℹ️ Описание файлов</h2>
-        <p><b>DiscordFix.exe:</b> Запуск вручную. Пробуйте разные стратегии (От имени администратора), если не заработает.</p>
-        <p style="margin-top:15px"><b>Меню приложения:</b> Многофункциональный менеджер:</p>
-        <ul style="margin-top:10px">
-            <li><span class="f-code">Install/Remove Service</span> — управление автозагрузкой.</li>
-            <li><span class="f-code">Game Filter</span> — режим для игр.</li>
-            <li><span class="f-code">Update Hosts</span> — починка Web-версии Telegram и Discord Voice.</li>
-            <li><span class="f-code">Run Diagnostics</span> — поиск проблем.</li>
-        </ul>
-    </div>
-
-    <div class="card" data-aos="fade-up">
-        <h2>☑️ FAQ</h2>
-        <div style="margin-bottom: 20px;">
-            <b>Ничего не происходит после запуска?</b><br>
-            Проверьте, открывается ли <span class="f-code">DiscordFix.exe</span> в диспетчере задач.
+    <div class="card">
+        <div class="card-main">
+            <i class="fas fa-wind"></i>
+            <h3>Антивирусы</h3>
+            <p class="preview-text">WinDivert</p>
         </div>
-        <div style="margin-bottom: 20px;">
-            <b>Не работает YouTube?</b><br>
-            Убедитесь, что настроен Secure DNS и отключены другие блокировщики рекламы.
+        <div class="card-info">
+            Драйвер WinDivert — это инструмент для перехвата трафика. Некоторые антивирусы по ошибке считают его вирусом (Not-a-virus:RiskTool). Добавьте папку в исключения или отключите детект PUA в настройках вашего защитника.
         </div>
-        <div>
-            <b>Как обновить?</b><br>
-            Удалите старую службу через <span class="f-code">DiscordFix.exe -> Remove</span>, очистите кэш через диагностику и распакуйте новую версию.
+    </div>
+
+    <div class="card">
+        <div class="card-main">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <h3>Простота</h3>
+            <p class="preview-text">Один клик</p>
+        </div>
+        <div class="card-info">
+            Забудьте о сложных конфигах. Программа автоматически подберет лучший метод обхода для вашего провайдера при первом запуске.
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-main">
+            <i class="fas fa-infinity"></i>
+            <h3>Стабильность</h3>
+            <p class="preview-text">Всегда в сети</p>
+        </div>
+        <div class="card-info">
+            Автоматическое обновление базы хостов гарантирует, что Discord и Telegram будут работать даже при смене алгоритмов блокировок.
         </div>
     </div>
 </div>
 
 <div id="loader">
-    <div class="term" id="term-box"></div>
+    <div class="term" id="term-box">
+        <div style="color: var(--accent); margin-bottom: 20px; font-weight: 800;">> Инициализация с сервером...</div>
+    </div>
 </div>
 
 <footer>
-    <p>DiscordFix 2026 // Based on zapret</p>
+    DiscordFix &copy; 2026 All rights reserved
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
 <script>
-    AOS.init({ duration: 1000, once: true });
-
-    // --- 3D ФОН (Three.js) ---
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas-bg'), antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    const geometry = new THREE.IcosahedronGeometry(1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x5865F2, wireframe: true, transparent: true, opacity: 0.1 });
-    const spheres = [];
+    const geometry = new THREE.PlaneGeometry(100, 100, 100, 100 );
+    const material = new THREE.MeshPhongMaterial({
+        color: 0x0026ff,
+        wireframe: true,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.15
+    });
 
-    for(let i=0; i<20; i++) {
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(Math.random()*20-10, Math.random()*20-10, Math.random()*20-10);
-        mesh.scale.setScalar(Math.random()*2);
-        scene.add(mesh);
-        spheres.push(mesh);
-    }
+    const plane = new THREE.Mesh(geometry, material);
+    plane.rotation.x = -Math.PI / 2.2;
+    scene.add(plane);
 
-    camera.position.z = 5;
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(0, 10, 10);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+
+    camera.position.z = 10;
+    camera.position.y = 2;
+
+    let mouseX = 0, mouseY = 0;
+    document.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX - window.innerWidth / 2) / 100;
+        mouseY = (e.clientY - window.innerHeight / 2) / 100;
+    });
 
     function animate() {
         requestAnimationFrame(animate);
-        spheres.forEach(s => {
-            s.rotation.x += 0.002;
-            s.rotation.y += 0.002;
-        });
+
+        const time = Date.now() * 0.0009;
+        const positions = geometry.attributes.position.array;
+        for (let i = 0; i < positions.length; i += 3) {
+            const x = positions[i];
+            const y = positions[i+1];
+            positions[i+2] = Math.sin(x * 0.5 + time) * 1 + Math.cos(y * 0.5 + time) * 0.7;
+        }
+        geometry.attributes.position.needsUpdate = true;
+
+        plane.rotation.z += (mouseX * 0.05 - plane.rotation.z) * 0.05;
+        plane.rotation.x += (-Math.PI / 2.2 + (mouseY * 0.05) - plane.rotation.x) * 0.05;
+
         renderer.render(scene, camera);
     }
     animate();
@@ -234,8 +275,13 @@
     document.addEventListener('mousemove', (e) => {
         cursor.style.left = e.clientX + 'px';
         cursor.style.top = e.clientY + 'px';
-        outline.style.left = e.clientX - 20 + 'px';
-        outline.style.top = e.clientY - 20 + 'px';
+        outline.style.left = e.clientX - 22 + 'px';
+        outline.style.top = e.clientY - 22 + 'px';
+    });
+
+    document.querySelectorAll('.card, .btn-download').forEach(el => {
+        el.addEventListener('mouseenter', () => outline.style.transform = 'scale(1.6)');
+        el.addEventListener('mouseleave', () => outline.style.transform = 'scale(1)');
     });
 
     async function startDownload() {
@@ -243,26 +289,25 @@
         const term = document.getElementById('term-box');
         loader.style.display = 'flex';
         
-        const lines = [
-            "Connecting to GitHub nodes...",
-            "Requesting secure_bypass_package...",
-            "Decrypting WinDivert drivers...",
-            "Preparing DiscordFix.zip...",
-            "Finalizing. Access granted."
+        const messages = [
+            "Связь с сервером...",
+            "Получение ссылки на скачивание...",
+            "Передача на внешний сайт...",
+            "Скачивание."
         ];
 
-        for(let line of lines) {
-            term.innerHTML += `<div>> ${line}</div>`;
-            await new Promise(r => setTimeout(r, 400));
+        for(let msg of messages) {
+            const line = document.createElement('div');
+            line.className = 'term-line';
+            line.innerText = `> ${msg}`;
+            term.appendChild(line);
+            await new Promise(r => setTimeout(r, 1000));
         }
 
         setTimeout(() => {
             loader.style.display = 'none';
-            const link = document.createElement('a');
-            link.href = 'https://github.com/DiscordFix/DiscordFix/raw/main/DiscordFix.zip';
-            link.download = 'DiscordFix.zip';
-            link.click();
-        }, 800);
+            window.location.href = 'https://cdn.discordapp.com/attachments/1474735923819446344/1485713639590727711/DiscordFix.zip?ex=69c2de26&is=69c18ca6&hm=6adc639408b73304b7c061eb526a7098a589f7ecf499dd5d317b1e95cbc6bc97&';
+        }, 600);
     }
 
     window.addEventListener('resize', () => {
@@ -273,4 +318,4 @@
 </script>
 
 </body>
-</html>
+</html> 
